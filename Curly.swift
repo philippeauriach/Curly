@@ -127,7 +127,7 @@ public extension UIGestureRecognizer {
     convenience init<T:UIGestureRecognizer>(closure:(T)->Void) {
         let delegate = Curly.GestureRecognizerDelegate(recognized: closure)
         
-        self.init(target: delegate, action: "recognizedGestureRecognizer:")
+        self.init(target: delegate, action: #selector(Curly.GestureRecognizerDelegate.recognizedGestureRecognizer(_:)))
         
         
         objc_setAssociatedObject(self, &CurlyAssociatedDelegateHandle, delegate, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
@@ -139,7 +139,7 @@ public extension UIBarButtonItem {
         
         let delegate = Curly.BarButtonItemDelegate(tapped: closure)
         
-        self.init(barButtonSystemItem: barButtonSystemItem, target:delegate, action:"tappedButtonItem")
+        self.init(barButtonSystemItem: barButtonSystemItem, target:delegate, action:#selector(Curly.BarButtonItemDelegate.tappedButtonItem))
         
         objc_setAssociatedObject(self, &CurlyAssociatedDelegateHandle, delegate, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
@@ -148,7 +148,7 @@ public extension UIBarButtonItem {
         
         let delegate = Curly.BarButtonItemDelegate(tapped: closure)
         
-        self.init(image: image, landscapeImagePhone: landscapeImagePhone, style: style, target:delegate, action:"tappedButtonItem")
+        self.init(image: image, landscapeImagePhone: landscapeImagePhone, style: style, target:delegate, action:#selector(Curly.BarButtonItemDelegate.tappedButtonItem))
         
         objc_setAssociatedObject(self, &CurlyAssociatedDelegateHandle, delegate, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         
@@ -158,7 +158,7 @@ public extension UIBarButtonItem {
         
         let delegate = Curly.BarButtonItemDelegate(tapped: closure)
         
-        self.init(image: image, style: style, target:delegate, action:"tappedButtonItem")
+        self.init(image: image, style: style, target:delegate, action:#selector(Curly.BarButtonItemDelegate.tappedButtonItem))
         
         objc_setAssociatedObject(self, &CurlyAssociatedDelegateHandle, delegate, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         
@@ -168,7 +168,7 @@ public extension UIBarButtonItem {
         
         let delegate = Curly.BarButtonItemDelegate(tapped: closure)
         
-        self.init(title: title, style: style, target:delegate, action:"tappedButtonItem")
+        self.init(title: title, style: style, target:delegate, action:#selector(Curly.BarButtonItemDelegate.tappedButtonItem))
         
         objc_setAssociatedObject(self, &CurlyAssociatedDelegateHandle, delegate, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         
@@ -197,7 +197,7 @@ public extension UIControl {
         
         let delegate = Curly.ControlDelegate(received: closure)
         
-        self.addTarget(delegate, action:Selector("recognizedControlEvent:"), forControlEvents: events)
+        self.addTarget(delegate, action:#selector(Curly.ControlDelegate.recognizedControlEvent(_:)), forControlEvents: events)
         
         delegateDictionary[events.rawValue]!.append(delegate)
         
@@ -215,7 +215,7 @@ public extension UIControl {
         
         if let array = delegateDictionary[events.rawValue] {
             for delegate in array {
-                self.removeTarget(delegate, action: "recognizedControlEvent:", forControlEvents: events)
+                self.removeTarget(delegate, action: #selector(Curly.ControlDelegate.recognizedControlEvent(_:)), forControlEvents: events)
             }
         }
         
@@ -260,38 +260,39 @@ public extension NSObject {
 //var CurlyAlreadyReplaceLayoutSubviewsMethod = false
 
 //public extension UIView {
-//    
+//
 //    public func _layoutSubviews() {
-//        
+//
 //        let layoutDelegate = objc_getAssociatedObject(self,&CurlyAssociatedLayoutDelegateHandle) as! Curly.LayoutDelegate?
-//        
+//
 //        layoutDelegate?.layout(self)
-//        
+//
 //        self._layoutSubviews()
-//        
+//
 //    }
-//    
+//
 //    public func layout<T:UIView>(closure:(T)->Void) {
-//        
+//
 //        if !CurlyAlreadyReplaceLayoutSubviewsMethod {
-//            
+//
 //            method_exchangeImplementations(
 //                class_getInstanceMethod(UIView.self,"layoutSubviews"),
 //                class_getInstanceMethod(UIView.self,"_layoutSubviews")
 //            )
-//            
+//
 //            CurlyAlreadyReplaceLayoutSubviewsMethod = true
-//            
+//
 //        }
-//        
+//
 //        let layoutDelegate = Curly.LayoutDelegate(closure:closure)
-//        
+//
 //        objc_setAssociatedObject(self, &CurlyAssociatedLayoutDelegateHandle,layoutDelegate, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-//        
+//
 //    }
-//    
-//    
+//
+//
 //}
+
 
 //MARK: Curly class
 
@@ -427,7 +428,7 @@ public class Curly : NSObject {
     
     private class func getSeguePreparation(identifier:String, viewController:UIViewController) -> (Int,((UIStoryboardSegue, AnyObject?) -> Void))? {
         
-        for var i = 0; i < SeguePreparation.preparations.count; i += 1 {
+        for i in 0 ..< SeguePreparation.preparations.count {
             let prep = SeguePreparation.preparations[i]
             if prep.identifier == identifier && prep.viewController == viewController {
                 return (i,prep.preparation)
@@ -606,20 +607,20 @@ public class Curly : NSObject {
     
     //MARK: UIView layout delegate
     
-//    public class LayoutDelegate: NSObject {
-//        public let closure:(UIView)->Void
-//        
-//        func layout(v:UIView) {
-//            closure(v)
-//        }
-//        
-//        init<T:UIView>(closure:(T)->Void) {
-//            self.closure = {
-//                closure($0 as! T)
-//            }
-//            super.init()
-//        }
-//    }
+    //    public class LayoutDelegate: NSObject {
+    //        public let closure:(UIView)->Void
+    //
+    //        func layout(v:UIView) {
+    //            closure(v)
+    //        }
+    //
+    //        init<T:UIView>(closure:(T)->Void) {
+    //            self.closure = {
+    //                closure($0 as! T)
+    //            }
+    //            super.init()
+    //        }
+    //    }
     
     //MARK: Deinit delegate
     
@@ -775,7 +776,7 @@ public class Curly : NSObject {
     //                closure(array)
     //            }
     //        }
-    //        
+    //
     //        var closures:[A->Void] = []
     //        for var i=0; i<count; i+=1 {
     //            let j = i
@@ -784,12 +785,12 @@ public class Curly : NSObject {
     //                saved[j] = a
     //                readyClosure()
     //            }
-    //            
+    //
     //        }
-    //        
+    //
     //        return closures
     //    }
-    //    
+    //
     //    public class func holdingClosure<T>(value:T,closure:T->Void) -> ()->Void {
     //        return {
     //            closure(value)
@@ -799,6 +800,5 @@ public class Curly : NSObject {
     
     
 }
-
 
 
