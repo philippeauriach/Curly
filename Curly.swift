@@ -48,37 +48,6 @@ var CurlyAssociatedConnectionDelegateHandle: UInt8 = 0
 //}
 //
 //
-public extension UIAlertView {
-    public func show(clicked clicked:(alertView:UIAlertView,buttonIndex:Int)->Void) {
-        self.show(clicked:clicked,willPresent:nil, didPresent: nil, willDismiss: nil, didDismiss: nil, canceled: nil, shouldEnableFirstOtherButton: nil)
-    }
-    
-    public func show(willDismiss willDismiss:(alertView:UIAlertView,buttonIndex:Int)->Void) {
-        self.show(clicked:nil,willPresent:nil, didPresent: nil, willDismiss:willDismiss, didDismiss: nil, canceled: nil, shouldEnableFirstOtherButton: nil)
-    }
-    
-    public func show(didDismiss didDismiss:(alertView:UIAlertView,buttonIndex:Int)->Void) {
-        self.show(clicked:nil,willPresent:nil, didPresent: nil, willDismiss: nil, didDismiss: didDismiss, canceled: nil, shouldEnableFirstOtherButton: nil)
-    }
-    
-    public func show(clicked clicked:((alertView:UIAlertView,buttonIndex:Int)->Void)?,
-        willPresent:((alertView:UIAlertView)->Void)?,
-        didPresent:((alertView:UIAlertView)->Void)?,
-        willDismiss:((alertView:UIAlertView,buttonIndex:Int)->Void)?,
-        didDismiss:((alertView:UIAlertView,buttonIndex:Int)->Void)?,
-        canceled:((alertView:UIAlertView)->Void)?,
-        shouldEnableFirstOtherButton:((alertView:UIAlertView)->Bool)?) {
-            
-            let delegate = Curly.AlertViewDelegate(clicked: clicked, willPresent: willPresent, didPresent: didPresent, willDismiss: willDismiss, didDismiss: didDismiss, canceled: canceled, shouldEnableFirstOtherButton: shouldEnableFirstOtherButton)
-            
-            self.delegate = delegate
-            
-            objc_setAssociatedObject(self, &CurlyAssociatedDelegateHandle, delegate, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-            
-            self.show()
-            
-    }
-}
 
 public extension UINavigationController {
     public func setDelegate(willShow willShow:((viewController:UIViewController,animated:Bool)->Void)?, didShow:((viewController:UIViewController,animated:Bool)->Void)? = nil) {
@@ -323,30 +292,6 @@ public extension NSObject {
 //    
 //    
 //}
-
-//TODO: Document this
-
-public extension NSURLConnection {
-    public class func sendAndReturnAsynchronousRequest(request: NSURLRequest, queue: NSOperationQueue!, completionHandler:(NSURLResponse!, NSData!, NSError!) -> Void) -> NSURLConnection! {
-        
-        let delegate = Curly.ConnectionDelegate(done:completionHandler)
-        
-        let connection = NSURLConnection(
-            request: request,
-            delegate: delegate,
-            startImmediately: true
-        )
-        
-        if connection != nil {
-            objc_setAssociatedObject(connection!, &CurlyAssociatedConnectionDelegateHandle,delegate, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
-        
-        return connection
-        
-    }
-}
-
-
 
 //MARK: Curly class
 
@@ -601,92 +546,6 @@ public class Curly : NSObject {
             }
         }
         
-    }
-    
-    //MARK: UIAlertView, UIAlertViewDelegate
-    
-    public class AlertViewDelegate: NSObject, UIAlertViewDelegate {
-        
-        var clicked:((alertView:UIAlertView,buttonIndex:Int)->Void)?
-        var willPresent:((alertView:UIAlertView)->Void)?
-        var didPresent:((alertView:UIAlertView)->Void)?
-        var willDismiss:((alertView:UIAlertView,buttonIndex:Int)->Void)?
-        var didDismiss:((alertView:UIAlertView,buttonIndex:Int)->Void)?
-        var canceled:((alertView:UIAlertView)->Void)?
-        var shouldEnableFirstOtherButton:((alertView:UIAlertView)->Bool)?
-        
-        init(clicked v_clicked:((alertView:UIAlertView,buttonIndex:Int)->Void)?,
-            willPresent v_willPresent:((alertView:UIAlertView)->Void)?,
-            didPresent v_didPresent:((alertView:UIAlertView)->Void)?,
-            willDismiss v_willDismiss:((alertView:UIAlertView,buttonIndex:Int)->Void)?,
-            didDismiss v_didDismiss:((alertView:UIAlertView,buttonIndex:Int)->Void)?,
-            canceled v_canceled:((alertView:UIAlertView)->Void)?,
-            shouldEnableFirstOtherButton v_shouldEnableFirstOtherButton:((alertView:UIAlertView)->Bool)?) {
-                clicked = v_clicked
-                willPresent = v_willPresent
-                didPresent = v_didPresent
-                willDismiss = v_willDismiss
-                didDismiss = v_didDismiss
-                canceled = v_canceled
-                shouldEnableFirstOtherButton = v_shouldEnableFirstOtherButton
-                super.init()
-        }
-        
-        public func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
-            
-            if clicked != nil {
-                clicked!(alertView: alertView,buttonIndex: buttonIndex)
-            }
-        }
-        
-        public func alertViewCancel(alertView: UIAlertView) {
-            if canceled == nil {
-                alertView.dismissWithClickedButtonIndex(alertView.cancelButtonIndex, animated: false)
-            }else{
-                canceled!(alertView:alertView)
-            }
-        }
-        
-        public func willPresentAlertView(alertView: UIAlertView) {
-            if willPresent != nil {
-                willPresent!(alertView: alertView)
-            }
-        }
-        
-        public func didPresentAlertView(alertView: UIAlertView) {
-            if didPresent != nil {
-                didPresent!(alertView: alertView)
-            }
-        }
-        
-        public func alertView(alertView: UIAlertView, willDismissWithButtonIndex buttonIndex: Int) {
-            
-            
-            if willDismiss != nil {
-                willDismiss!(alertView: alertView, buttonIndex: buttonIndex)
-            }
-        }
-        
-        public func alertView(alertView: UIAlertView, didDismissWithButtonIndex buttonIndex: Int) {
-            
-            
-            if didDismiss != nil {
-                didDismiss!(alertView: alertView, buttonIndex: buttonIndex)
-            }
-        }
-        
-        public func alertViewShouldEnableFirstOtherButton(alertView: UIAlertView) -> Bool {
-            //println("should enable???")
-            if shouldEnableFirstOtherButton == nil {
-                return true
-            }else{
-                return shouldEnableFirstOtherButton!(alertView: alertView)
-            }
-        }
-        
-        deinit {
-            
-        }
     }
     
     //MARK: Bar button item delegate
